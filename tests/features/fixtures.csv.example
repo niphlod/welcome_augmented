@@ -1,0 +1,37 @@
+TABLE auth_user
+auth_user.id,auth_user.first_name,auth_user.last_name,auth_user.email,auth_user.password,auth_user.registration_key,auth_user.reset_password_key,auth_user.registration_id
+1,Homer,Simpson,homer@localhost,"pbkdf2(1000,20,sha512)$90b287ad95896d4a$b9390690660db72af9e1106cd017411b955f3dd1",,,
+
+
+TABLE auth_group
+auth_group.id,auth_group.role,auth_group.description
+1,user_1,Group uniquely assigned to user 1
+
+
+TABLE auth_membership
+auth_membership.id,auth_membership.user_id,auth_membership.group_id
+1,1,1
+
+
+TABLE auth_permission
+
+
+TABLE auth_event
+auth_event.id,auth_event.time_stamp,auth_event.client_ip,auth_event.user_id,auth_event.origin,auth_event.description
+1,2013-03-25 22:17:11,127.0.0.1,<NULL>,auth,Group 1 created
+2,2013-03-25 22:17:11,127.0.0.1,1,auth,User 1 Registered
+
+
+TABLE auth_cas
+
+
+TABLE person
+
+
+TABLE dog
+
+
+TABLE comments
+
+
+END
