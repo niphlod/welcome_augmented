@@ -12,16 +12,14 @@ Instructions:
 - pip install behave and splinter
 - have firefox (for starters) installed
 - copy this app to the applications/* folder
-- cd into the applications/welcome_augmented/tests directory
-- start the test with ```behave features/smartgrid.feature``` or ```behave features/register.feature```
-
-NB1: if you launch ```behave``` with no parameters, it'll try to run one after another, and the latter would fail cause "Homer" is registered yet 
-(both features are ATM meant to be run separately, cause I meant register.feature to be a closed reproducible test of the current gluon/tests/test_web.py)
+- cd into the applications/welcome_augmented/tests/behavioural directory
+- start the test with ```behave```
 
 Notes: I made some helpers available in helpers.py and some initialization in environment.py, namely:
 in any step you can access:
 - c.host --> 127.0.0.1:8000
-- c.URL --> you can use c.URL instead of the "usual" URL to build urls against the app
+- c.web2py --> holds web2py env
+- c.web2py.URL --> you can use c.web2py.URL instead of the "usual" URL to build urls against the app
 - c.appname --> welcome_augmented
 - c.l --> logger
 - c.b --> splinter's Browser() instance
@@ -47,3 +45,4 @@ NB4: additional helpers and shortcuts can be added, this is only a first mockup
 TODO:
 - [ ] smooth integration with web2py
 - [ ] smooth integration with travis-ci
+- [x] prepare separations of environment for various test frameworks
