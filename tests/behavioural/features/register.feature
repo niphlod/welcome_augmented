@@ -1,3 +1,4 @@
+@splinter @reset_database
 Feature: Registering and login to welcome_augmented
 
   Scenario: login and register

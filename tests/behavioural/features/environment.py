@@ -68,21 +68,20 @@ def reset_database(context):
     """
     wipes out the databases folder !!!
     """
-    databases = os.path.join(context.web2py_path, 'applications', context.appname, 'databases')
-    for a in os.listdir(databases):
-        complete_path = os.path.join(databases, a)
-        if os.path.isfile(complete_path):
-            os.unlink(complete_path)
+    context.l.info("resetting database")
+    for tab in context.web2py.db.tables:
+        context.web2py.db[tab].truncate()
 
-def load_fixtures(context):
+
+def create_env(context):
     """
-    ATM it looks for a fixtures.csv file and loads it into the database
-    and install a URL helper
+    creates a web2py env, like the shell one
     """
     from gluon.shell import env
+    from gluon.storage import Storage
     app_path = os.path.join(context.web2py_path, 'applications', context.appname)
-    fixture_file = os.path.join(app_path, 'tests', 'features', 'fixtures.csv')
-    env_ = env(a=context.appname, import_models=True, dir=app_path)
+    env_ = env(a=context.appname, import_models=True, dir=app_path, extra_request=dict(is_local=True))
+    context.web2py = Storage(env_)
     def bogus_url(
         a=None,
         c=None,
@@ -117,27 +116,50 @@ def load_fixtures(context):
             port=port,
             encode_embedded_slash=encode_embedded_slash,
             url_encode=url_encode)
-    context.URL = bogus_url
+    context.web2py.URL = bogus_url
+
+
+def load_fixtures(context):
+    """
+    ATM it looks for a fixtures.csv file and loads it into the database
+    """
+    fixture_file = os.path.join(context.web2py.request.folder, 'tests', 'behavioural', 'db_dump', 'fixtures.csv')
     if os.path.isfile(fixture_file):
         print 'loading fixtures...'
         with open(fixture_file, 'rb') as g:
-            env_['db'].import_from_csv_file(g)
-        env_['db'].commit()
+            context.web2py.db.import_from_csv_file(g)
+        context.web2py.db.commit()
 
 def before_all(context):
+    from gluon.contrib.webclient import WebClient
     context.host = '127.0.0.1:8000'
     context.appname = 'welcome_augmented'
     context.web2py_path = os.environ['WEB2PY_PATH']
     logger = logging.getLogger(context.appname)
     context.l = logger
-    reset_database(context)
+    create_env(context)
     load_fixtures(context)
     context.webserverprocess = startwebserver(context)
-    context.b = Browser('firefox')
+
     time.sleep(1)
     #visit home page
-    home_page = context.URL('default', 'index')
-    context.b.visit(home_page)
+    home_page = context.web2py.URL('default', 'index')
+
+    context.client = WebClient(home_page)
+
+def before_feature(context, feature):
+    if 'splinter' in feature.tags:
+        context.b = Browser('firefox')
+        home_page = context.web2py.URL('default', 'index')
+        context.b.visit(home_page)
+    if 'reset_database' in feature.tags:
+        reset_database(context)
+
+
+def after_feature(context, feature):
+    if 'splinter' in feature.tags:
+        pass#context.b.quit()
 
 def after_all(context):
     stopwebserver(context.webserverprocess)
+

@@ -1,4 +1,6 @@
+@splinter @reset_database
 Feature: Testing Smartgrid
+
   Scenario: Homer wants to insert into the app his whole family
     Given Homer registers and reaches the smartgrid page
     When he clicks on the Add button
@@ -12,6 +14,7 @@ Feature: Testing Smartgrid
     | Bart   |
     | Maggie |
     Then the table will have "5" rows
+
 
   Scenario: Homer wants to assign Santa's Little Helper to Bart
     Given Homer reaching the smartgrid page

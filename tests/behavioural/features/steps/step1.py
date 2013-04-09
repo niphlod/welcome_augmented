@@ -4,7 +4,7 @@ from helpers import *
 
 @given('Homer registers and reaches the smartgrid page')
 def impl(c):
-    smartgrid_page = c.URL('default', 'alltables')
+    smartgrid_page = c.web2py.URL('default', 'alltables')
     fast_register(c)
     c.b.visit(smartgrid_page)
 
@@ -44,7 +44,7 @@ def impl(c, number):
 
 @given('Homer reaching the smartgrid page')
 def impl(c):
-    smartgrid_page = c.URL('default', 'alltables')
+    smartgrid_page = c.web2py.URL('default', 'alltables')
     c.b.visit(smartgrid_page)
 
 @when('he chooses "{link_name}" in the line corresponding to "{person_name}"')
@@ -95,4 +95,11 @@ def impl(c, person_name, number):
     assert normstr(breadcrumb) == normstr(foundtext)
 
     rows = c.b.find_by_css('.web2py_table table tbody tr')
+    db = c.web2py.db
+    total = db(
+        (db.person.person_name ==  person_name) &
+        (db.dog.master_id == db.person.id)
+        ).count()
+    
+    assert total == number
     assert len(rows) == number

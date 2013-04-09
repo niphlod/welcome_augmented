@@ -27,7 +27,7 @@ def fast_register(c):
         email='homer@localhost'
         )
 
-    register_page = c.URL('default', 'user', args='register')
+    register_page = c.web2py.URL('default', 'user', args='register')
     c.l.info('reached %s', register_page)
     c.b.visit(register_page)
     fill_form_typing(c, data)
