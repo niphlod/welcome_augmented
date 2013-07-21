@@ -7,7 +7,11 @@ import signal
 import subprocess
 import time
 import logging
+import re
 from splinter.browser import Browser
+
+HOST = '127.0.0.1'
+PORT = 8001
 
 logging.basicConfig()
 
@@ -27,16 +31,33 @@ else:
 if not os.environ['WEB2PY_PATH'] in sys.path:
     sys.path.insert(0, os.environ['WEB2PY_PATH'])
 
+from gluon.contrib.webclient import WebClient
+
+def get_current_app():
+    pwd = os.getcwd()
+    app_search = re.search(r'applications/(.+?)/tests', pwd)
+    if app_search:
+        return app_search.group(1)
+    else:
+        raise Exception("web2py app name could not be discovered because pattern 'applications/(.+?)/tests' do not match %s" % pwd)
+
 def startwebserver(context):
     """
     starts the default webserver on port 8000
     """
-    webserverprocess = subprocess.Popen([sys.executable, os.path.join(context.web2py_path, 'web2py.py'), '-a',  'testpass'])
+    startargs = [sys.executable, os.path.join(context.web2py_path, 'web2py.py')]
+    startargs.extend(['-i', HOST, '-p', str(PORT), '-a', 'testpass'])
+    webserverprocess = subprocess.Popen(startargs)
     print 'Sleeping before web2py starts...'
-    for a in range(1,5):
+    for i in range(1, 5):
         time.sleep(1)
-        print a, '...'
-    print ''
+        print i, '...'
+        try:
+            c = WebClient('http://%s:%s' % (HOST, PORT))
+            c.get('/')
+            break
+        except:
+            continue
     return webserverprocess
 
 def terminate_process(pid):
@@ -131,9 +152,8 @@ def load_fixtures(context):
         context.web2py.db.commit()
 
 def before_all(context):
-    from gluon.contrib.webclient import WebClient
-    context.host = '127.0.0.1:8000'
-    context.appname = 'welcome_augmented'
+    context.host = '%s:%s' % (HOST, PORT)
+    context.appname = get_current_app()
     context.web2py_path = os.environ['WEB2PY_PATH']
     logger = logging.getLogger(context.appname)
     context.l = logger
@@ -158,8 +178,7 @@ def before_feature(context, feature):
 
 def after_feature(context, feature):
     if 'splinter' in feature.tags:
-        pass#context.b.quit()
+        context.b.quit()
 
 def after_all(context):
     stopwebserver(context.webserverprocess)
-
